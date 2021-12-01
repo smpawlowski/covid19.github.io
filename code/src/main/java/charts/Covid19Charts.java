@@ -202,10 +202,9 @@ public class Covid19Charts {
                 .fullOuter(true, dead, recovered)
                 .sortAscendingOn("DT");
         t = t.where(t.doubleColumn("CONFIRMED").isGreaterThan(0));
-        t = t.addColumns(t.nCol("CONFIRMED").subtract(t.nCol("RECOVERED")).subtract(t.nCol("DEAD")).setName("ACTIVE"));
 
         List<Figure> figures = new ArrayList<>();
-        Table totalCases = t.summarize(t.column(2), t.column(3), t.column(4), t.column(5), AggregateFunctions.sum)
+        Table totalCases = t.summarize(t.column(2), t.column(3), AggregateFunctions.sum)
                 .by("DT");
         String confirmed_name = columnNameContaning(totalCases, "CONFIRMED");
         totalCases = totalCases.addColumns(TableUtils.apply(TableUtils.d1(totalCases.numberColumn(confirmed_name), "NEW CONFIRMED"), x -> Math.max(0, x)));
@@ -213,14 +212,14 @@ public class Covid19Charts {
         totalCases = totalCases.addColumns(TableUtils.apply(TableUtils.d1(totalCases.numberColumn(dead_name), "NEW DEAD"), x -> Math.max(0, x)));
         System.out.println(totalCases.print());
 
-        String[] cumul_col_names = {"CONFIRMED", "ACTIVE", "RECOVERED", "DEAD"};
+        String[] cumul_col_names = {"CONFIRMED", "DEAD"};
         Table finalTotalCases = totalCases;
         figures.add(TableUtils.timeSeriesPlot(
                 totalCases,
                 "DT",
                 new String[][]{Arrays.stream(cumul_col_names).map(n -> columnNameContaning(finalTotalCases, n)).toArray(String[]::new),
                         {"NEW CONFIRMED", "NEW DEAD"}},
-                new ScatterTrace.Mode[][]{{ScatterTrace.Mode.LINE_AND_MARKERS, ScatterTrace.Mode.LINE_AND_MARKERS, ScatterTrace.Mode.LINE_AND_MARKERS, ScatterTrace.Mode.LINE_AND_MARKERS},
+                new ScatterTrace.Mode[][]{{ScatterTrace.Mode.LINE_AND_MARKERS, ScatterTrace.Mode.LINE_AND_MARKERS},
                         {ScatterTrace.Mode.LINE_AND_MARKERS, ScatterTrace.Mode.LINE_AND_MARKERS}},
                 "GLOBAL CASES: " + String.format("%,d", (int) totalCases.numberColumn(confirmed_name).max()) + " CONFIRMED",
                 new String[]{"TOTAL CASES", "NEW CASES"}));
@@ -234,7 +233,7 @@ public class Covid19Charts {
                     "DT",
                     new String[][]{cumul_col_names,
                             {"NEW CONFIRMED", "NEW DEAD"}},
-                    new ScatterTrace.Mode[][]{{ScatterTrace.Mode.LINE_AND_MARKERS, ScatterTrace.Mode.LINE_AND_MARKERS, ScatterTrace.Mode.LINE_AND_MARKERS, ScatterTrace.Mode.LINE_AND_MARKERS},
+                    new ScatterTrace.Mode[][]{{ScatterTrace.Mode.LINE_AND_MARKERS, ScatterTrace.Mode.LINE_AND_MARKERS},
                             {ScatterTrace.Mode.LINE_AND_MARKERS, ScatterTrace.Mode.LINE_AND_MARKERS}},
                     counter + ". " + region + ": " + String.format("%,d", num_confirmed) + " CONFIRMED",
                     new String[]{"TOTAL CASES", "NEW CASES"}));
