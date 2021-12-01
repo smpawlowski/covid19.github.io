@@ -188,7 +188,6 @@ public class Covid19Charts {
     public static String download_html_charts() throws IOException {
         Table confirmed = toTimeSeries(Table.read().url("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv"), "CONFIRMED");
         Table dead = toTimeSeries(Table.read().url("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"), "DEAD");
-        Table recovered = toTimeSeries(Table.read().url("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv"), "RECOVERED");
 
         Table maxConfirmedByRegion = confirmed.summarize("CONFIRMED", AggregateFunctions.max)
                 .by("REGION");
@@ -199,7 +198,7 @@ public class Covid19Charts {
         System.out.println(maxConfirmedByRegion.print());
 
         Table t = confirmed.joinOn("REGION", "DT")
-                .fullOuter(true, dead, recovered)
+                .fullOuter(true, dead)
                 .sortAscendingOn("DT");
         t = t.where(t.doubleColumn("CONFIRMED").isGreaterThan(0));
 
